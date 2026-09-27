@@ -26,6 +26,6 @@ The app runs at **http://localhost:3000** by default.
 
 ## Important
 
-Creation of this app was heavily assisted with AI (Claude Opus 4.6).
+Creation of this app was heavily assisted with AI (Claude Opus 4.6, Gemini 3.8 Flash).
 For personal use only.
 Use at your own discretion.
