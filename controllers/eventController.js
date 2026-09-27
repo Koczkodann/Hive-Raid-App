@@ -1,11 +1,14 @@
 const EventModel = require('../models/eventModel');
-const { ROLE_CATEGORIES, ALL_JOBS } = require('../config/roles');
+const { ROLE_CATEGORIES, ALL_JOBS, partitionRoster } = require('../config/roles');
 
 /**
  * GET / — render the main events listing page.
  */
 function listEvents(req, res) {
-  const events = EventModel.getAll();
+  const events = EventModel.getAll().map((event) => ({
+    ...event,
+    partitioned: partitionRoster(event.roster),
+  }));
   res.render('index', { title: 'Upcoming Raids', events });
 }
 
@@ -16,9 +19,12 @@ function showEvent(req, res) {
   const event = EventModel.getById(req.params.id);
   if (!event) return res.status(404).render('404', { title: 'Raid Not Found' });
 
+  const partitioned = partitionRoster(event.roster);
+
   res.render('event', {
     title: event.name,
     event,
+    partitioned,
     roleCategories: ROLE_CATEGORIES,
   });
 }

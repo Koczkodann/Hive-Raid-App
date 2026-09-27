@@ -235,6 +235,78 @@ h2 {
   background: var(--bg-secondary);
 }
 
+/* --- Lineup & Slot Styling --- */
+.section-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.section-header-flex h2 {
+  margin-bottom: 0;
+}
+
+.slot-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.slot-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+.slot-pill--full {
+  background: rgba(46, 204, 113, 0.15);
+  border-color: var(--success);
+  color: #a3e635;
+}
+
+.slot--empty td {
+  background: rgba(22, 33, 62, 0.35);
+  border-bottom: 1px dashed var(--border);
+}
+.slot--empty:hover td {
+  background: rgba(22, 33, 62, 0.65);
+}
+
+.slot-role-cell {
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.slot-placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.queue-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  background: rgba(233, 69, 96, 0.18);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ff9fb0;
+}
+
+.enroll-explanation {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
 /* --- Role badges --- */
 .role-badge {
   display: inline-block;
@@ -447,6 +519,7 @@ h2 {
   padding: 1.5rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  margin-bottom: 2.5rem;
 }
 
 .enroll-form {
