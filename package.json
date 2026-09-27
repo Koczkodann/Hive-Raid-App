@@ -1,0 +1,22 @@
+{
+  "name": "hive-raid-app",
+  "version": "1.0.0",
+  "description": "FF14 raid coordination web app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ff14",
+    "raid",
+    "coordination"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.19.0"
+  }
+}

@@ -1,3 +1,17 @@
+# ── App runtime data (sensitive / per-deployment) ──
+data/*.json
+data/*.bak
+!data/.gitkeep
+
+# ── OS & editor files ──
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
 # Logs
 logs
 *.log

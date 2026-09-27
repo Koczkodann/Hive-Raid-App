@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<h1>🛡️ Admin Panel</h1>
+
+<!-- ── Create event form ── -->
+<section class="admin-section">
+  <h2>Create New Raid Event</h2>
+  <form action="/admin/events" method="POST" class="admin-form" id="create-event-form">
+    <div class="form-group">
+      <label for="name">Raid Name</label>
+      <input type="text" id="name" name="name" placeholder="e.g. The Omega Protocol (Ultimate)" required>
+    </div>
+    <div class="form-group">
+      <label for="localDatetime">Date &amp; Time (your local time)</label>
+      <input type="datetime-local" id="localDatetime" required>
+      <input type="hidden" id="datetime-utc" name="datetime">
+    </div>
+    <div class="form-group">
+      <label for="description">Description (optional)</label>
+      <textarea id="description" name="description" rows="3" placeholder="Weekly clear, prog party, etc."></textarea>
+    </div>
+    <button type="submit" class="btn btn--primary">Create Event</button>
+  </form>
+</section>
+
+<!-- ── Existing events list ── -->
+<section class="admin-section">
+  <h2>Existing Events</h2>
+
+  <% if (events.length === 0) { %>
+    <p class="empty-state">No events yet. Create one above!</p>
+  <% } else { %>
+    <div class="admin-events-list">
+      <% events.forEach((event) => { %>
+        <div class="admin-event-row">
+          <div class="admin-event-info">
+            <strong><a href="/events/<%= event.id %>"><%= event.name %></a></strong>
+            <span class="admin-event-meta">📅 <time class="local-datetime" datetime="<%= event.datetime %>"><%= event.datetime %></time> · 👥 <%= event.roster.length %> enrolled</span>
+          </div>
+          <form action="/admin/events/<%= event.id %>/delete" method="POST" class="inline-form">
+            <button type="submit" class="btn btn--danger btn--sm" data-confirm="Delete &quot;<%= event.name %>&quot;? This cannot be undone.">Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

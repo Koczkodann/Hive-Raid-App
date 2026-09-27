@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+
+<a href="/" class="back-link">&larr; Back to all raids</a>
+
+<div class="event-detail">
+  <h1><%= event.name %></h1>
+  <div class="event-detail__meta">
+    <span>📅 <time class="local-datetime" datetime="<%= event.datetime %>"><%= event.datetime %></time></span>
+  </div>
+  <% if (event.description) { %>
+    <p class="event-detail__desc"><%= event.description %></p>
+  <% } %>
+</div>
+
+<!-- ── Roster ── -->
+<section class="roster-section">
+  <h2>Party Roster (<%= event.roster.length %>)</h2>
+
+  <% if (event.roster.length === 0) { %>
+    <p class="empty-state">No one has enrolled yet. Be the first!</p>
+  <% } else { %>
+    <div class="roster-table-wrapper">
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role / Job</th>
+            <% if (isAdmin) { %>
+              <th></th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% event.roster.forEach((member) => { %>
+            <tr>
+              <td><%= member.name %></td>
+              <td>
+                <span class="role-badge role-badge--<%= member.role.toLowerCase().replace(/\s+/g, '-') %>">
+                  <%= member.role %>
+                </span>
+              </td>
+              <% if (isAdmin) { %>
+                <td>
+                  <form action="/events/<%= event.id %>/unenroll/<%= member.id %>" method="POST" class="inline-form">
+                    <button type="submit" class="btn btn--danger btn--sm" data-confirm="Remove <%= member.name %> from the roster?">✕</button>
+                  </form>
+                </td>
+              <% } %>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<!-- ── Enroll form ── -->
+<section class="enroll-section">
+  <h2>Enroll</h2>
+  <form action="/events/<%= event.id %>/enroll" method="POST" class="enroll-form">
+    <div class="form-group">
+      <label for="name">Character Name</label>
+      <input type="text" id="name" name="name" placeholder="e.g. Y'shtola Rhul" required>
+    </div>
+    <div class="form-group">
+      <label for="role">Job / Role</label>
+      <select id="role" name="role" required>
+        <option value="" disabled selected>Select a job…</option>
+        <% roleCategories.forEach((cat) => { %>
+          <optgroup label="<%= cat.category %>">
+            <% cat.jobs.forEach((job) => { %>
+              <option value="<%= job %>"><%= job %></option>
+            <% }) %>
+          </optgroup>
+        <% }) %>
+      </select>
+    </div>
+    <button type="submit" class="btn btn--primary">Join Raid</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

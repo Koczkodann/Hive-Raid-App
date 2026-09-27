@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>⚙️ Admin Setup</h1>
+    <p class="auth-subtitle">Set your admin password. You'll use this to manage raids.</p>
+    <form action="/admin/setup" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="password">New Password</label>
+        <input type="password" id="password" name="password" placeholder="Choose a strong password" minlength="4" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="confirm">Confirm Password</label>
+        <input type="password" id="confirm" name="confirm" placeholder="Type it again" minlength="4" required>
+      </div>
+      <button type="submit" class="btn btn--primary btn--full">Set Password &amp; Log In</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

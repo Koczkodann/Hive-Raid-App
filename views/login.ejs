@@ -1,0 +1,16 @@
+<%- include('partials/header') %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>🔐 Admin Login</h1>
+    <form action="/admin/login" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter admin password" required autofocus>
+      </div>
+      <button type="submit" class="btn btn--primary btn--full">Log In</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
