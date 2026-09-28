@@ -21,7 +21,7 @@
             <span class="event-card__date">📅 <time class="local-datetime" datetime="<%= event.datetime %>"><%= event.datetime %></time></span>
           </div>
           <div class="event-card__roster-count">
-            👥 <%= event.roster.length %> enrolled
+            👥 <%= event.partitioned ? event.partitioned.totalMain : event.roster.length %>/8 Main<% if (event.partitioned && event.partitioned.totalReserve > 0) { %> · <%= event.partitioned.totalReserve %> Reserve<% } %>
           </div>
         </div>
       </a>

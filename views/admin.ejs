@@ -35,7 +35,7 @@
         <div class="admin-event-row">
           <div class="admin-event-info">
             <strong><a href="/events/<%= event.id %>"><%= event.name %></a></strong>
-            <span class="admin-event-meta">📅 <time class="local-datetime" datetime="<%= event.datetime %>"><%= event.datetime %></time> · 👥 <%= event.roster.length %> enrolled</span>
+            <span class="admin-event-meta">📅 <time class="local-datetime" datetime="<%= event.datetime %>"><%= event.datetime %></time> · 👥 <%= event.partitioned ? event.partitioned.totalMain : event.roster.length %>/8 Main<% if (event.partitioned && event.partitioned.totalReserve > 0) { %> · <%= event.partitioned.totalReserve %> Reserve<% } %></span>
           </div>
           <form action="/admin/events/<%= event.id %>/delete" method="POST" class="inline-form">
             <button type="submit" class="btn btn--danger btn--sm" data-confirm="Delete &quot;<%= event.name %>&quot;? This cannot be undone.">Delete</button>

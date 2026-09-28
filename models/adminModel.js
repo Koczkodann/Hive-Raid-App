@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 const DATA_PATH = path.join(__dirname, '..', 'data', 'admin.json');
@@ -14,15 +15,33 @@ function _read() {
   try {
     const raw = fs.readFileSync(DATA_PATH, 'utf-8');
     return JSON.parse(raw);
-  } catch {
-    return {};
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return {};
+    }
+    console.error(`[CRITICAL] Failed to read or parse ${DATA_PATH}:`, err.message);
+    throw err;
   }
 }
 
-/** Persist admin data to disk. */
+/** Persist admin data to disk atomically. */
 function _write(data) {
-  fs.mkdirSync(path.dirname(DATA_PATH), { recursive: true });
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  const dir = path.dirname(DATA_PATH);
+  fs.mkdirSync(dir, { recursive: true });
+  const tempPath = `${DATA_PATH}.${Date.now()}.${crypto.randomBytes(4).toString('hex')}.tmp`;
+  try {
+    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf-8');
+    fs.renameSync(tempPath, DATA_PATH);
+  } catch (err) {
+    try {
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath);
+      }
+    } catch {
+      // Ignore cleanup error
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------

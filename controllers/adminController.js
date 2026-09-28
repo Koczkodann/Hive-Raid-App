@@ -1,11 +1,15 @@
 const EventModel = require('../models/eventModel');
 const AdminModel = require('../models/adminModel');
+const { partitionRoster } = require('../config/roles');
 
 /**
  * GET /admin — render the admin panel (requires login).
  */
 function showPanel(req, res) {
-  const events = EventModel.getAll();
+  const events = EventModel.getAll().map((event) => ({
+    ...event,
+    partitioned: partitionRoster(event.roster),
+  }));
   res.render('admin', { title: 'Admin Panel', events });
 }
 

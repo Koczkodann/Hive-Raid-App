@@ -12,51 +12,13 @@
   <% } %>
 </div>
 
-<!-- ── Roster ── -->
-<section class="roster-section">
-  <h2>Party Roster (<%= event.roster.length %>)</h2>
-
-  <% if (event.roster.length === 0) { %>
-    <p class="empty-state">No one has enrolled yet. Be the first!</p>
-  <% } else { %>
-    <div class="roster-table-wrapper">
-      <table class="roster-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Role / Job</th>
-            <% if (isAdmin) { %>
-              <th></th>
-            <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% event.roster.forEach((member) => { %>
-            <tr>
-              <td><%= member.name %></td>
-              <td>
-                <span class="role-badge role-badge--<%= member.role.toLowerCase().replace(/\s+/g, '-') %>">
-                  <%= member.role %>
-                </span>
-              </td>
-              <% if (isAdmin) { %>
-                <td>
-                  <form action="/events/<%= event.id %>/unenroll/<%= member.id %>" method="POST" class="inline-form">
-                    <button type="submit" class="btn btn--danger btn--sm" data-confirm="Remove <%= member.name %> from the roster?">✕</button>
-                  </form>
-                </td>
-              <% } %>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  <% } %>
-</section>
-
 <!-- ── Enroll form ── -->
 <section class="enroll-section">
-  <h2>Enroll</h2>
+  <h2>Enroll for this Raid</h2>
+  <p class="enroll-explanation">
+    The main lineup takes 2 Tanks, 2 Healers, 2 Melee DPS, and 2 Range DPS.
+    If your chosen role is already full, you will be placed on the <strong>Reserve Bench</strong> and automatically promoted if a spot opens up!
+  </p>
   <form action="/events/<%= event.id %>/enroll" method="POST" class="enroll-form">
     <div class="form-group">
       <label for="name">Character Name</label>
@@ -77,6 +39,119 @@
     </div>
     <button type="submit" class="btn btn--primary">Join Raid</button>
   </form>
+</section>
+
+<!-- ── Main Lineup (Standard 8-man Party) ── -->
+<section class="roster-section">
+  <div class="section-header-flex">
+    <h2>Main Lineup (<%= partitioned.totalMain %>/8)</h2>
+    <div class="slot-summary">
+      <span class="slot-pill <%= partitioned.counts['Tank'] === 2 ? 'slot-pill--full' : '' %>">🛡️ Tank <%= partitioned.counts['Tank'] %>/2</span>
+      <span class="slot-pill <%= partitioned.counts['Healer'] === 2 ? 'slot-pill--full' : '' %>">💚 Healer <%= partitioned.counts['Healer'] %>/2</span>
+      <span class="slot-pill <%= partitioned.counts['Melee DPS'] === 2 ? 'slot-pill--full' : '' %>">⚔️ Melee <%= partitioned.counts['Melee DPS'] %>/2</span>
+      <span class="slot-pill <%= partitioned.counts['Range DPS'] === 2 ? 'slot-pill--full' : '' %>">🏹 Range <%= partitioned.counts['Range DPS'] %>/2</span>
+    </div>
+  </div>
+
+  <div class="roster-table-wrapper">
+    <table class="roster-table lineup-table">
+      <thead>
+        <tr>
+          <th>Slot</th>
+          <th>Character Name</th>
+          <th>Job / Class</th>
+          <% if (isAdmin) { %>
+            <th></th>
+          <% } %>
+        </tr>
+      </thead>
+      <tbody>
+        <% const roleLabels = { 'Tank': '🛡️ Tank', 'Healer': '💚 Healer', 'Melee DPS': '⚔️ Melee DPS', 'Range DPS': '🏹 Range DPS' }; %>
+        <% for (const [roleName, members] of Object.entries(partitioned.slots)) { %>
+          <% members.forEach((member, idx) => { %>
+            <tr class="<%= member ? 'slot--filled' : 'slot--empty' %>">
+              <td class="slot-role-cell">
+                <span class="slot-role-title"><%= roleLabels[roleName] || roleName %> #<%= idx + 1 %></span>
+              </td>
+              <td>
+                <% if (member) { %>
+                  <strong class="member-name"><%= member.name %></strong>
+                <% } else { %>
+                  <span class="slot-placeholder">Open Vacancy &mdash; Needs <%= roleName %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (member) { %>
+                  <span class="role-badge role-badge--<%= member.role.toLowerCase().replace(/\s+/g, '-') %>">
+                    <%= member.role %>
+                  </span>
+                <% } else { %>
+                  <span class="text-muted">&mdash;</span>
+                <% } %>
+              </td>
+              <% if (isAdmin) { %>
+                <td>
+                  <% if (member) { %>
+                    <form action="/events/<%= event.id %>/unenroll/<%= member.id %>" method="POST" class="inline-form">
+                      <button type="submit" class="btn btn--danger btn--sm" data-confirm="Remove <%= member.name %> from main lineup? The first reserve in line will be promoted.">✕</button>
+                    </form>
+                  <% } %>
+                </td>
+              <% } %>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Reserve Bench ── -->
+<section class="roster-section reserve-section">
+  <h2>Reserve Bench (<%= partitioned.totalReserve %>)</h2>
+
+  <% if (partitioned.reserve.length === 0) { %>
+    <p class="empty-state">No one is on the reserve bench yet. If main squad spots fill up, subsequent sign-ups will wait here in queue.</p>
+  <% } else { %>
+    <div class="roster-table-wrapper">
+      <table class="roster-table reserve-table">
+        <thead>
+          <tr>
+            <th>Queue Position</th>
+            <th>Character Name</th>
+            <th>Job / Role</th>
+            <% if (isAdmin) { %>
+              <th></th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% partitioned.reserve.forEach((member) => { %>
+            <tr>
+              <td>
+                <span class="queue-badge queue-badge--<%= member.broadRole.toLowerCase().replace(/\s+/g, '-') %>">
+                  <%= member.broadRole %> &bull; #<%= member.queuePosition %> in line
+                </span>
+              </td>
+              <td><strong><%= member.name %></strong></td>
+              <td>
+                <span class="role-badge role-badge--<%= member.role.toLowerCase().replace(/\s+/g, '-') %>">
+                  <%= member.role %>
+                </span>
+              </td>
+              <% if (isAdmin) { %>
+                <td>
+                  <form action="/events/<%= event.id %>/unenroll/<%= member.id %>" method="POST" class="inline-form">
+                    <button type="submit" class="btn btn--danger btn--sm" data-confirm="Remove <%= member.name %> from reserve queue?">✕</button>
+                  </form>
+                </td>
+              <% } %>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
 </section>
 
 <%- include('partials/footer') %>

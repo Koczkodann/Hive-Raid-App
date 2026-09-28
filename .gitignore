@@ -1,6 +1,7 @@
 # ── App runtime data (sensitive / per-deployment) ──
 data/*.json
 data/*.bak
+data/*.tmp
 !data/.gitkeep
 
 # ── OS & editor files ──

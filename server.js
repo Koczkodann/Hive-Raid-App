@@ -10,6 +10,17 @@ const { attachAdminStatus } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// --- Security headers & hardening ---
+app.disable('x-powered-by');
+
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-XSS-Protection', '0');
+  next();
+});
+
 // --- View engine ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -26,6 +37,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
   },
 }));
