@@ -17,12 +17,12 @@
   <h2>Enroll for this Raid</h2>
   <p class="enroll-explanation">
     The main lineup takes 2 Tanks, 2 Healers, 2 Melee DPS, and 2 Range DPS.
-    If your chosen role is already full, you will be placed on the <strong>Reserve Bench</strong> and automatically promoted if a spot opens up!
+    If your chosen role is already full, you will be placed on the <strong>Reserve Bench</strong> (maximum 4 reserves per role) and automatically promoted if a spot opens up!
   </p>
   <form action="/events/<%= event.id %>/enroll" method="POST" class="enroll-form">
     <div class="form-group">
       <label for="name">Character Name</label>
-      <input type="text" id="name" name="name" placeholder="e.g. Y'shtola Rhul" required>
+      <input type="text" id="name" name="name" placeholder="e.g. Y'shtola Rhul" required maxlength="30">
     </div>
     <div class="form-group">
       <label for="role">Job / Role</label>
@@ -31,7 +31,11 @@
         <% roleCategories.forEach((cat) => { %>
           <optgroup label="<%= cat.category %>">
             <% cat.jobs.forEach((job) => { %>
-              <option value="<%= job %>"><%= job %></option>
+              <% const broadRole = getBroadRole(job); %>
+              <% const isFull = partitioned.isRoleFull && partitioned.isRoleFull[broadRole]; %>
+              <option value="<%= job %>" <%= isFull ? 'disabled' : '' %>>
+                <%= job %><%= isFull ? ' (Full — 6/6)' : '' %>
+              </option>
             <% }) %>
           </optgroup>
         <% }) %>
@@ -130,7 +134,7 @@
             <tr>
               <td>
                 <span class="queue-badge queue-badge--<%= member.broadRole.toLowerCase().replace(/\s+/g, '-') %>">
-                  <%= member.broadRole %> &bull; #<%= member.queuePosition %> in line
+                  <%= member.broadRole %> &bull; #<%= member.queuePosition %>/4 in line
                 </span>
               </td>
               <td><strong><%= member.name %></strong></td>

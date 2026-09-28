@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Flash messages from query params ──
   showFlashMessages();
+
+  // ── Character name 30-character limit feedback ──
+  setupCharacterNameLimit();
 });
 
 // ---------------------------------------------------------------------------
@@ -97,8 +100,39 @@ function setupAdminDatetimeForm() {
 }
 
 // ---------------------------------------------------------------------------
-// Flash Messages
+// Flash Messages & UI Feedback
 // ---------------------------------------------------------------------------
+
+function displayFlash(message, type = 'error') {
+  const existing = document.querySelector('.flash');
+  if (existing) existing.remove();
+
+  const flash = document.createElement('div');
+  flash.className = `flash flash--${type}`;
+  flash.textContent = message;
+
+  Object.assign(flash.style, {
+    position: 'fixed',
+    top: '70px',
+    right: '1.5rem',
+    padding: '0.75rem 1.25rem',
+    borderRadius: '8px',
+    fontWeight: '600',
+    zIndex: '200',
+    background: type === 'error' ? '#e74c3c' : '#2ecc71',
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    animation: 'fadeIn 0.3s ease',
+  });
+
+  document.body.appendChild(flash);
+
+  setTimeout(() => {
+    flash.style.opacity = '0';
+    flash.style.transition = 'opacity 0.4s';
+    setTimeout(() => flash.remove(), 400);
+  }, 3000);
+}
 
 function showFlashMessages() {
   const params = new URLSearchParams(window.location.search);
@@ -106,32 +140,32 @@ function showFlashMessages() {
   const success = params.get('success');
 
   if (error || success) {
-    const flash = document.createElement('div');
-    flash.className = `flash flash--${error ? 'error' : 'success'}`;
-    flash.textContent = error || success;
-
-    Object.assign(flash.style, {
-      position: 'fixed',
-      top: '70px',
-      right: '1.5rem',
-      padding: '0.75rem 1.25rem',
-      borderRadius: '8px',
-      fontWeight: '600',
-      zIndex: '200',
-      background: error ? '#e74c3c' : '#2ecc71',
-      color: '#fff',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-      animation: 'fadeIn 0.3s ease',
-    });
-
-    document.body.appendChild(flash);
-
-    setTimeout(() => {
-      flash.style.opacity = '0';
-      flash.style.transition = 'opacity 0.4s';
-      setTimeout(() => flash.remove(), 400);
-    }, 3000);
-
+    displayFlash(error || success, error ? 'error' : 'success');
     window.history.replaceState({}, '', window.location.pathname);
   }
+}
+
+/**
+ * Limit character name to 30 characters without mentioning it upfront.
+ * Alerts the user with a flash message if they attempt to type or paste more.
+ */
+function setupCharacterNameLimit() {
+  const nameInput = document.getElementById('name');
+  if (!nameInput) return;
+
+  nameInput.addEventListener('input', () => {
+    if (nameInput.value.length > 30) {
+      nameInput.value = nameInput.value.slice(0, 30);
+      displayFlash('Character name cannot exceed 30 characters', 'error');
+    }
+  });
+
+  nameInput.addEventListener('keydown', (e) => {
+    if (nameInput.value.length >= 30 && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const hasSelection = nameInput.selectionStart !== nameInput.selectionEnd;
+      if (!hasSelection) {
+        displayFlash('Character name cannot exceed 30 characters', 'error');
+      }
+    }
+  });
 }

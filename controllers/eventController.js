@@ -1,5 +1,12 @@
 const EventModel = require('../models/eventModel');
-const { ROLE_CATEGORIES, ALL_JOBS, partitionRoster } = require('../config/roles');
+const {
+  ROLE_CATEGORIES,
+  ALL_JOBS,
+  ROLE_LIMITS,
+  RESERVE_LIMITS,
+  getBroadRole,
+  partitionRoster,
+} = require('../config/roles');
 
 /**
  * GET / — render the main events listing page.
@@ -26,6 +33,7 @@ function showEvent(req, res) {
     event,
     partitioned,
     roleCategories: ROLE_CATEGORIES,
+    getBroadRole,
   });
 }
 
@@ -37,15 +45,33 @@ function enrollMember(req, res) {
   const eventId = req.params.id;
 
   // Basic validation
-  if (!name || !name.trim()) {
-    return res.redirect(`/events/${eventId}?error=Name is required`);
+  const trimmedName = name ? name.trim().replace(/[\r\n\t]+/g, ' ') : '';
+  if (!trimmedName) {
+    return res.redirect(`/events/${eventId}?error=${encodeURIComponent('Name is required')}`);
+  }
+  if (trimmedName.length > 30) {
+    return res.redirect(`/events/${eventId}?error=${encodeURIComponent('Character name cannot exceed 30 characters')}`);
   }
   if (!ALL_JOBS.includes(role)) {
-    return res.redirect(`/events/${eventId}?error=Invalid role selected`);
+    return res.redirect(`/events/${eventId}?error=${encodeURIComponent('Invalid role selected')}`);
   }
 
-  EventModel.addMember(eventId, { name: name.trim(), role });
-  res.redirect(`/events/${eventId}`);
+  const event = EventModel.getById(eventId);
+  if (!event) {
+    return res.status(404).render('404', { title: 'Raid Not Found' });
+  }
+
+  const broadRole = getBroadRole(role);
+  const partitioned = partitionRoster(event.roster);
+  const maxMain = ROLE_LIMITS[broadRole] || 2;
+  const maxReserve = RESERVE_LIMITS[broadRole] || 4;
+
+  if (partitioned.counts[broadRole] >= maxMain && (partitioned.reserveCounts[broadRole] || 0) >= maxReserve) {
+    return res.redirect(`/events/${eventId}?error=${encodeURIComponent(`Cannot join: ${broadRole} slots are completely full (max 2 main + 4 reserves)`)}`);
+  }
+
+  EventModel.addMember(eventId, { name: trimmedName, role });
+  res.redirect(`/events/${eventId}?success=${encodeURIComponent('Joined raid successfully!')}`);
 }
 
 /**
